@@ -14,7 +14,7 @@ const PORT = 3000;
 const app = express();
 
 // Enable CORS for all routes (you can customize it later if needed)
-app.use(cors());
+app.use(cors('*'));
 
 // Json Parsor
 app.use(express.json());
@@ -29,5 +29,5 @@ app.use('/ai', aiRoutes);
 
 // Start the server on the specified port
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    // console.log(`Server is running on http://localhost:${PORT}`);
 });

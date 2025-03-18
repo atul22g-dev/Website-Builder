@@ -1,8 +1,11 @@
 import { MODIFICATIONS_TAG_NAME, WORK_DIR, allowedHTMLElements } from './constants.js';
+import { reactBasePrompt } from './reactPromt.js';
 
 export const BASE_PROMPT = "For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.\n\nBy default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.\n\nUse icons from lucide-react for logos.\n\nUse stock photos from unsplash where appropriate, only valid URLs you know exist. Do not download the images, only link to them in image tags.\n\n";
 
 export const getSystemPrompt = `
+${BASE_PROMPT}
+Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n
 You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
 
 <system_constraints>
@@ -68,15 +71,15 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
         return a + b;
       }
 
-      -console.log('Hello, World!');
-      +console.log('Hello, Bolt!');
+      // -console.log('Hello, World!');
+      // +console.log('Hello, Bolt!');
       +
       function greet() {
       -  return 'Greetings!';
       +  return 'Greetings!!';
       }
       +
-      +console.log('The End');
+      // +console.log('The End');
     </diff>
     <file path="/home/project/package.json">
       // full file content here
@@ -277,3 +280,5 @@ Here are some examples of correct usage of artifacts:
   </example>
 </examples>
 `;
+
+export const nodeBasePrompt = '<boltArtifact id=\"project-import\" title=\"Project Files\"><boltAction type=\"file\" filePath=\"index.js\">// run `node index.js` in the terminal\n\nconsole.log(`Hello Node.js v${process.versions.node}!`);\n</boltAction><boltAction type=\"file\" filePath=\"package.json\">{\n  \"name\": \"node-starter\",\n  \"private\": true,\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  }\n}\n</boltAction></boltArtifact>';

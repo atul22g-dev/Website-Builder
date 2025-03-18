@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-// import { StepsList } from '../components/StepsList';
-// import { FileExplorer } from '../components/FileExplorer';
-// import { TabView } from '../components/TabView';
-// import { CodeEditor } from '../components/CodeEditor';
-// import { PreviewFrame } from '../components/PreviewFrame';
+import StepsList from '../components/StepsList.jsx';
+import FileExplorer from '../components/FileExplorer';
+import TabView from '../components/TabView';
+import CodeEditor from '../components/CodeEditor';
+import PreviewFrame from '../components/PreviewFrame';
 // import { Step, FileItem, StepType } from '../types';
 import axios from 'axios';
 import { BACKEND_URL } from '../utility/config';
-// import { parseXml } from '../steps';
-// import { useWebContainer } from '../hooks/useWebContainer';
+import { parseXml, StepType } from '../helper/steps.js';
+import { useWebContainer } from '../helper/useWebContainer.js';
 // import { FileNode } from '@webcontainer/api';
-// import { Loader } from '../components/Loader';
-
-const MOCK_FILE_CONTENT = `// This is a sample file content
-import React from 'react';
-
-function Component() {
-    return <div>Hello World</div>;
-}
-
-export default Component;`;
+import Loader from '../components/Loader';
 
 const Builder = () => {
     const location = useLocation();
-    const {prompt} = location.state;
+    const { prompt } = location.state;
     const [userPrompt, setPrompt] = useState("");
     const [llmMessages, setLlmMessages] = useState([{ role: "user", content: "" }]);
     const [loading, setLoading] = useState(false);
     const [templateSet, setTemplateSet] = useState(false);
-    // const webcontainer = useWebContainer();
+    const webcontainer = useWebContainer();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [activeTab, setActiveTab] = useState('code');
@@ -94,7 +85,7 @@ const Builder = () => {
                 status: "completed"
             })));
         }
-        console.log(files);
+        // console.log(files);
     }, [steps, files]);
 
     useEffect(() => {
@@ -140,21 +131,18 @@ const Builder = () => {
         const mountStructure = createMountStructure(files);
 
         // Mount the structure if WebContainer is available
-        console.log(mountStructure);
-        // webcontainer?.mount(mountStructure);
-    // }, [files, webcontainer]);
-    }, [files]);
+        // console.log(mountStructure);
+        webcontainer?.mount(mountStructure);
+        }, [files, webcontainer]);
 
     async function init() {
-        const response = await axios.post(`${BACKEND_URL}/template`, {
+        const response = await axios.post(`${BACKEND_URL}/ai/template`, {
             prompt: prompt.trim()
         });
         setTemplateSet(true);
 
         const { prompts, uiPrompts } = response.data;
 
-        // console.log(prompts);
-        
 
         setSteps(parseXml(uiPrompts[0]).map(x => ({
             ...x,
@@ -162,19 +150,23 @@ const Builder = () => {
         })));
 
         setLoading(true);
-        const stepsResponse = await axios.post(`${BACKEND_URL}/chat`, {
-            messages: [...prompts, prompt].map(content => ({
-                role: "user",
-                content
-            }))
+        const stepsResponse = await axios.post(`${BACKEND_URL}/ai/chat`, {
+            prompt: prompt
         });
+
 
         setLoading(false);
 
-        setSteps(s => [...s, ...parseXml(stepsResponse.data.response).map(x => ({
-            ...x,
-            status: "pending"
-        }))]);
+        const responseContent = stepsResponse.data;
+        if (responseContent) {
+            setSteps(s => [...s, ...parseXml(responseContent).map(x => ({
+                ...x,
+                status: "pending"
+            }))]);
+        } else {
+            console.error("Response is undefined or null.");
+            // Handle the error as needed, perhaps notify the user or log the issue
+        }
 
         setLlmMessages([...prompts, prompt].map(content => ({
             role: "user",
@@ -187,12 +179,12 @@ const Builder = () => {
     useEffect(() => {
         init();
     }, []);
-    
+
     return (
         <div className="min-h-screen bg-gray-900 flex flex-col">
             <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
                 <h1 className="text-xl font-semibold text-gray-100">Website Builder</h1>
-                <p className="text-sm text-gray-400 mt-1">Prompt: {prompt}</p>/
+                <p className="text-sm text-gray-400 mt-1">Prompt: {prompt}</p>
             </header>
 
             <div className="flex-1 overflow-hidden">
@@ -200,16 +192,16 @@ const Builder = () => {
                     <div className="col-span-1 space-y-6 overflow-auto">
                         <div>
                             <div className="max-h-[75vh] overflow-scroll">
-                                {/* <StepsList
+                                <StepsList
                                     steps={steps}
                                     currentStep={currentStep}
                                     onStepClick={setCurrentStep}
-                                /> */}
+                                />
                             </div>
                             <div>
                                 <div className="flex">
                                     <br />
-                                    {/* {(loading || !templateSet) && <Loader />} */}
+                                    {(loading || !templateSet) && <Loader />}
                                     {!(loading || !templateSet) && (
                                         <div className="flex">
                                             <textarea
@@ -252,21 +244,19 @@ const Builder = () => {
                         </div>
                     </div>
                     <div className="col-span-1">
-                        {/* <FileExplorer
+                        <FileExplorer
                             files={files}
                             onFileSelect={setSelectedFile}
-                        /> */}
+                        />
                     </div>
                     <div className="col-span-2 bg-gray-900 rounded-lg shadow-lg p-4 h-[calc(100vh-8rem)]">
-                        {/* <TabView activeTab={activeTab} onTabChange={setActiveTab} /> */}
+                        <TabView activeTab={activeTab} onTabChange={setActiveTab} />
                         <div className="h-[calc(100%-4rem)]">
                             {activeTab === 'code' ? (
-                                // remove '' after
-                                '' //<CodeEditor file={selectedFile} /> 
-                                
+                                <CodeEditor file={selectedFile} /> 
+
                             ) : (
-                                ''
-                                // <PreviewFrame webContainer={webcontainer} files={files} />
+                                <PreviewFrame webContainer={webcontainer} files={files} />
                             )}
                         </div>
                     </div>

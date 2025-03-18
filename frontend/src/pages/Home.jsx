@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toastify } from '../utility/toastify'
+import { toast } from 'react-toastify'
 
 const Home = () => {
     const [prompt, setPrompt] = useState('');
@@ -10,6 +12,9 @@ const Home = () => {
         e.preventDefault();
         if (prompt.trim()) {
             navigate('/builder', { state: { prompt } });
+        }else{
+            // console.log("err");
+            toast.info('Pls Fill Prompt', toastify())
         }
     };
 

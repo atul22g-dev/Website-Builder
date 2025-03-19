@@ -1,6 +1,50 @@
 @import "tailwindcss";
 
+/* 
+primary = bg-gradient-to-br from-gray-900 to-gray-800
+Secandry = gray-800
+
+button background = blue-600
+hover button background = blue-700
+
+primary text color = gray-100
+secandary text color = gray-300
+
+icon color = blue-500
+
+text box background = gray-900
+
+boder color = gray-700
+
+placeholder = gray-500
+*/
+
+
+:root {
+    --header-height: 3.5rem;
+
+    --depec-h: 29rem;
+    --depec-w: 18rem;
+
+    --codeEditor-h: 38.43rem;
+    --codeEditor-w: 70rem;
+}
+
+
 /* Scroll bar Hidden */
 .scroll-hidden::-webkit-scrollbar {
     display: none;
+}
+
+/* scrollbar */
+.scrollbar::-webkit-scrollbar {
+    width: 18px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: var(--code-bg);
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--tertiary-color);
 }

@@ -24,7 +24,7 @@ const Home = () => {
             <div className="max-w-2xl w-full">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
-                        <Wand2 className="w-12 h-12 text-blue-400" />
+                        <Wand2 className="w-12 h-12 text-blue-500" />
                     </div>
                     <h1 className="text-4xl font-bold text-gray-100 mb-4">
                         Website Builder AI
@@ -40,7 +40,7 @@ const Home = () => {
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             placeholder="Describe the website you want to build..."
-                            className="w-full h-32 p-4 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-500"
+                            className="w-full h-32 p-4 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent resize-none placeholder-gray-500"
                         />
                         <button
                             type="submit"

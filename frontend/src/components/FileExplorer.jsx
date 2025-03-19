@@ -4,9 +4,9 @@ import { FolderTree, File, ChevronRight, ChevronDown } from 'lucide-react';
 const FileExplorer = ({ files, onFileSelect }) => {
     return (
         <div className="bg-gray-900 rounded-lg shadow-lg p-4 h-full overflow-auto">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100 border-2 border-gray-800">
                 <FolderTree className="w-5 h-5" />
-                File Explorer
+                File
             </h2>
             <div className="space-y-1">
                 {files.map((file, index) => (

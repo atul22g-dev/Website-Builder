@@ -14,7 +14,6 @@
     "@tailwindcss/vite": "^4.0.14",
     "@webcontainer/api": "^1.5.1-internal.10",
     "axios": "^1.8.3",
-    "fontawesome6pro": "^1.0.1",
     "lucide-react": "^0.483.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

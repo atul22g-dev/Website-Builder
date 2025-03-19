@@ -133,7 +133,7 @@ const Builder = () => {
         // Mount the structure if WebContainer is available
         // console.log(mountStructure);
         webcontainer?.mount(mountStructure);
-        }, [files, webcontainer]);
+    }, [files, webcontainer]);
 
     async function init() {
         const response = await axios.post(`${BACKEND_URL}/ai/template`, {
@@ -188,57 +188,64 @@ const Builder = () => {
             </header>
 
             <div className="flex-1 overflow-hidden">
-                <div className="h-full grid grid-cols-4 gap-6 p-6">
-                    <div className="col-span-1 space-y-6 overflow-auto">
+                <div className="h-full grid grid-cols-4 gap-6 p-2">
+                    <div className="col-span-1 h-full space-y-6 overflow-scroll scroll-hidden border-2 rounded-3xl border-gray-800">
                         <div>
-                            <div className="max-h-[75vh] overflow-scroll">
+                            <div className="max-h-[65vh] overflow-scroll scroll-hidden">
                                 <StepsList
                                     steps={steps}
                                     currentStep={currentStep}
                                     onStepClick={setCurrentStep}
                                 />
                             </div>
-                            <div>
+                            <div className='relative'>
                                 <div className="flex">
                                     <br />
                                     {(loading || !templateSet) && <Loader />}
-                                    {!(loading || !templateSet) && (
-                                        <div className="flex">
-                                            <textarea
-                                                value={userPrompt}
-                                                onChange={(e) => setPrompt(e.target.value)}
-                                                className="p-2 w-full"
-                                            />
-                                            <button
-                                                onClick={async () => {
-                                                    const newMessage = {
-                                                        role: "user",
-                                                        content: userPrompt
-                                                    };
+                                    {!(loading || !templateSet) &&
+                                        (
+                                            <div className="flex w-full">
+                                                <div className="w-full max-w-md p-2">
+                                                    <div className="h-[6rem] border border-gray-700 bg-transparent text-gray-300 rounded-lg p-3">
+                                                        <textarea
+                                                            value={userPrompt}
+                                                            onChange={(e) => { setPrompt(e.target.value) }}
+                                                            name="chat"
+                                                            className="flex-grow resize-none scroll-hidden bg-transparent h-full outline-none text-gray-300 placeholder-gray-500 w-[80%]"
+                                                            placeholder="How can Bolt help you today?">
+                                                        </textarea>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={async () => {
+                                                        const newMessage = {
+                                                            role: "user",
+                                                            content: userPrompt
+                                                        };
 
-                                                    setLoading(true);
-                                                    const stepsResponse = await axios.post(`${BACKEND_URL}/chat`, {
-                                                        messages: [...llmMessages, newMessage]
-                                                    });
-                                                    setLoading(false);
+                                                        setLoading(true);
+                                                        const stepsResponse = await axios.post(`${BACKEND_URL}/ai/chat`, {
+                                                            messages: [...llmMessages, newMessage]
+                                                        });
+                                                        setLoading(false);
 
-                                                    setLlmMessages(x => [...x, newMessage]);
-                                                    setLlmMessages(x => [...x, {
-                                                        role: "assistant",
-                                                        content: stepsResponse.data.response
-                                                    }]);
+                                                        setLlmMessages(x => [...x, newMessage]);
+                                                        setLlmMessages(x => [...x, {
+                                                            role: "assistant",
+                                                            content: stepsResponse.data.response
+                                                        }]);
 
-                                                    setSteps(s => [...s, ...parseXml(stepsResponse.data.response).map(x => ({
-                                                        ...x,
-                                                        status: "pending"
-                                                    }))]);
-                                                }}
-                                                className="bg-purple-400 px-4"
-                                            >
-                                                Send
-                                            </button>
-                                        </div>
-                                    )}
+                                                        setSteps(s => [...s, ...parseXml(stepsResponse.data.response).map(x => ({
+                                                            ...x,
+                                                            status: "pending"
+                                                        }))]);
+                                                    }}
+                                                    className="absolute right-4 top-6 cursor-pointer"
+                                                >
+                                                    <i className="fa-solid fa-paper-plane-top text-white"></i>
+                                                </button>
+                                            </div>
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -253,7 +260,7 @@ const Builder = () => {
                         <TabView activeTab={activeTab} onTabChange={setActiveTab} />
                         <div className="h-[calc(100%-4rem)]">
                             {activeTab === 'code' ? (
-                                <CodeEditor file={selectedFile} /> 
+                                <CodeEditor file={selectedFile} />
 
                             ) : (
                                 <PreviewFrame webContainer={webcontainer} files={files} />

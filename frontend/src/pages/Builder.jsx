@@ -8,6 +8,9 @@ import { useWebContainer } from '../helper/useWebContainer';
 import Chatbox from '../components/Chatbox';
 import Loader from '../components/Loader';
 import TabView from '../components/TabView';
+import FileExplorer from '../components/FileExplorer';
+import CodeEditor from '../components/CodeEditor';
+import PreviewFrame from '../components/PreviewFrame';
 
 const Builder = () => {
     const location = useLocation();
@@ -16,13 +19,11 @@ const Builder = () => {
     const [loading, setLoading] = useState(false);
     const [templateSet, setTemplateSet] = useState(false);
     const webcontainer = useWebContainer();
-
-    // const [activeTab, setActiveTab] = useState('code');
     // const [selectedFile, setSelectedFile] = useState(null);
 
     const [steps, setSteps] = useState([]);
     const [files, setFiles] = useState([]);
-
+    
     useEffect(() => {
         let originalFiles = [...files];
         let updateHappened = false;
@@ -185,8 +186,21 @@ const Builder = () => {
                 </div>
                 {/* Code Editor */}
                 <div className='border-2 border-gray-700 h-[var(--codeEditor-h)] w-[var(--codeEditor-w)] min-w-[var(--codeEditor-w)] rounded-lg'>
-                    {/*  */}
-                <TabView />
+                    {/* Code / Preview Container */}
+                    <TabView />
+                    {/* Code Editor */}
+                    {/* <div className="flex w-full h-[34.9rem] overflow-scroll scroll-hidden">
+                        <FileExplorer
+                            files={files}
+                            onFileSelect={setSelectedFile}
+                        />
+                        <CodeEditor file={selectedFile} />
+                    </div> */}
+                    {/* Preview */}
+
+                    {
+                        webcontainer ? <PreviewFrame webContainer={webcontainer} /> : ''
+                    }
                 </div>
             </div>
         </section>

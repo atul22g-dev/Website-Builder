@@ -263,12 +263,12 @@ const Builder = () => {
                             <div className="col-span-2 bg-gray-900 rounded-lg shadow-lg p-4 w-[70vw] h-[calc(100vh-8rem)]">
 
                                 <div className="h-[calc(100%-4rem)]">
-                                    {activeTab === 'code' ? (
+                                    {/* {activeTab === 'code' ? (
                                         <CodeEditor file={selectedFile} />
 
-                                    ) : (
+                                    ) : ( */}
                                         <PreviewFrame webContainer={webcontainer} files={files} />
-                                    )}
+                                    {/* )} */}
                                 </div>
                             </div>
                         </div>

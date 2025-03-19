@@ -51,3 +51,7 @@ placeholder = gray-500
 .scrollbar::-webkit-scrollbar-thumb {
     background-color: var(--tertiary-color);
 }
+
+/* .margin-view-overlays, .monaco-editor-background, .sticky-widget {
+    background-color: #101828 !important;
+} */

@@ -6,6 +6,8 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useWebContainer } from '../helper/useWebContainer';
 import Chatbox from '../components/Chatbox';
+import Loader from '../components/Loader';
+import TabView from '../components/TabView';
 
 const Builder = () => {
     const location = useLocation();
@@ -130,7 +132,7 @@ const Builder = () => {
         });
         setTemplateSet(true);
 
-        const {uiPrompts } = response.data;
+        const { uiPrompts } = response.data;
 
         setSteps(parseXml(uiPrompts[0]).map(x => ({
             ...x,
@@ -160,24 +162,32 @@ const Builder = () => {
         init();
     }, []);
 
+    if (loading || !templateSet) {
+        return (
+            <Loader />
+        )
+    }
     return (
+
+
         <section className='bg-gradient-to-br from-gray-900 to-gray-800 h-full w-full overflow-hidden'>
             {/* Header */}
-            <header className='h-[var(--header-height)] border-2 border-b-gray-700 flex items-center '>
+            <header className='bg-gray-900 h-[var(--header-height)] border-b-2 border-b-gray-700 flex items-center '>
                 <h1 className='text-gray-100 text-2xl font-bold ml-2'>Webite Builder</h1>
             </header>
             {/* Body */}
             <div className='flex gap-20 p-3 h-full'>
                 {/* StepsList  Container */}
                 <div className='border-2 border-gray-700 h-[var(--depec-h)] w-[var(--depec-w)] min-w-[var(--depec-w)]  rounded-lg'>
-                    <StepsList  steps={steps}/>
+                    <StepsList steps={steps} />
                     {/* Chat Box */}
-                    <Chatbox setLoading={setLoading} setSteps={setSteps}/>
+                    <Chatbox setLoading={setLoading} setSteps={setSteps} />
                 </div>
                 {/* Code Editor */}
                 <div className='border-2 border-gray-700 h-[var(--codeEditor-h)] w-[var(--codeEditor-w)] min-w-[var(--codeEditor-w)] rounded-lg'>
+                    {/*  */}
+                <TabView />
                 </div>
-
             </div>
         </section>
     )

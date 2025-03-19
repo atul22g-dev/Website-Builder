@@ -28,6 +28,9 @@ placeholder = gray-500
 
     --codeEditor-h: 38.43rem;
     --codeEditor-w: 70rem;
+
+    --text-blue: #2381c5;
+    --bg-text-blue: #2BA6FF1a;
 }
 
 

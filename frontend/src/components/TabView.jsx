@@ -1,29 +1,32 @@
-import React from 'react'
-import { Code2, Eye } from 'lucide-react';
+import React, { useState } from 'react'
 
-const TabView = ({ activeTab, onTabChange }) => {
+const TabView = () => {
+    const [activeButton, setActiveButton] = useState('code');
+
+    // Function to handle button click
+    const handleButtonClick = (button) => {
+        setActiveButton(button);
+    };
+
     return (
-        <div className="flex space-x-2 mb-4">
-            <button
-                onClick={() => onTabChange('code')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'code'
-                        ? 'bg-gray-700 text-gray-100'
-                        : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-                    }`}
-            >
-                <Code2 className="w-4 h-4" />
-                Code
-            </button>
-            <button
-                onClick={() => onTabChange('preview')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'preview'
-                        ? 'bg-gray-700 text-gray-100'
-                        : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-                    }`}
-            >
-                <Eye className="w-4 h-4" />
-                Preview
-            </button>
+        <div className='border-b-2 border-b-gray-700'>
+            <div className="flex gap-1 h-fit w-fit rounded-full bg-gray-700 p-1 m-2">
+                {/* Code Button */}
+                <div
+                    className={`relative w-fit h-fit rounded-full px-2.5 py-1 text-sm transition-all ${activeButton === 'code' ? 'bg-gray-900' : ''}`}
+                    onClick={() => handleButtonClick('code')}
+                >
+                    <button className="text-white font-semibold">Code</button>
+                </div>
+
+                {/* Preview Button */}
+                <div
+                    className={`relative w-fit h-fit rounded-full px-2.5 py-1 text-sm transition-all ${activeButton === 'preview' ? 'bg-gray-900' : ''}`}
+                    onClick={() => handleButtonClick('preview')}
+                >
+                    <button className="text-white font-semibold">Preview</button>
+                </div>
+            </div>
         </div>
     )
 }

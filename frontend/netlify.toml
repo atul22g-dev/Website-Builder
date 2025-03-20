@@ -1,0 +1,9 @@
+[build]
+  publish = "dist" # Adjust this to your build output directory
+  command = "npm run build" # Adjust this to your build command
+
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"

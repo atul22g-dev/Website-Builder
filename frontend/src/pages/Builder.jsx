@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import StepsList from '../components/StepsList'
+import React, { useEffect, useState } from 'react';
+import StepsList from '../components/StepsList';
 import { parseXml, StepType } from '../helper/steps';
 import { BACKEND_URL } from '../utility/config';
 import axios from 'axios';
@@ -12,26 +12,35 @@ import FileExplorer from '../components/FileExplorer';
 import CodeEditor from '../components/CodeEditor';
 import PreviewFrame from '../components/PreviewFrame';
 
+/**
+ * Builder Component for Website Creation
+ * @component
+ * 
+ * Created by: Atugatran
+ * Last Updated: 2025-03-20 16:18:57
+ */
 const Builder = () => {
     const location = useLocation();
     const { prompt } = location.state;
-    // const [llmMessages, setLlmMessages] = useState([{ role: "user", content: "" }]);
     const [loading, setLoading] = useState(false);
     const [templateSet, setTemplateSet] = useState(false);
-    const webcontainer = useWebContainer();
-    // const [selectedFile, setSelectedFile] = useState(null);
-
+    // Get both webcontainer and error state from the hook
+    const { webcontainer, error } = useWebContainer();
     const [steps, setSteps] = useState([]);
     const [files, setFiles] = useState([]);
     
+    /**
+     * Effect to handle file system updates based on steps
+     */
     useEffect(() => {
         let originalFiles = [...files];
         let updateHappened = false;
-        steps.filter(({ status }) => status === "pending").map(step => {
-            updateHappened = true;
+        
+        steps.filter(({ status }) => status === "pending").forEach(step => {
             if (step?.type === StepType.CreateFile) {
-                let parsedPath = step.path?.split("/") ?? []; // ["src", "components", "App.tsx"]
-                let currentFileStructure = [...originalFiles]; // {}
+                updateHappened = true;
+                let parsedPath = step.path?.split("/") ?? [];
+                let currentFileStructure = [...originalFiles];
                 let finalAnswerRef = currentFileStructure;
 
                 let currentFolder = "";
@@ -41,7 +50,7 @@ const Builder = () => {
                     parsedPath = parsedPath.slice(1);
 
                     if (!parsedPath.length) {
-                        // final file
+                        // Handle file creation
                         let file = currentFileStructure.find(x => x.path === currentFolder);
                         if (!file) {
                             currentFileStructure.push({
@@ -54,10 +63,9 @@ const Builder = () => {
                             file.content = step.code;
                         }
                     } else {
-                        // in a folder
+                        // Handle folder creation
                         let folder = currentFileStructure.find(x => x.path === currentFolder);
                         if (!folder) {
-                            // create the folder
                             currentFileStructure.push({
                                 name: currentFolderName,
                                 type: 'folder',
@@ -65,7 +73,6 @@ const Builder = () => {
                                 children: []
                             });
                         }
-
                         currentFileStructure = currentFileStructure.find(x => x.path === currentFolder).children;
                     }
                 }
@@ -80,82 +87,108 @@ const Builder = () => {
                 status: "completed"
             })));
         }
-        // console.log(files);
     }, [steps, files]);
 
+    /**
+     * Effect to mount files to WebContainer
+     */
     useEffect(() => {
-        const createMountStructure = (files) => {
-            const mountStructure = {};
+        async function mountFilesToWebContainer() {
+            if (!webcontainer || !files.length) return;
 
-            const processFile = (file, isRootFolder) => {
-                if (file.type === 'folder') {
-                    // For folders, create a directory entry
-                    mountStructure[file.name] = {
-                        directory: file.children ?
-                            Object.fromEntries(
-                                file.children.map(child => [child.name, processFile(child, false)])
-                            )
-                            : {}
-                    };
-                } else if (file.type === 'file') {
-                    if (isRootFolder) {
-                        mountStructure[file.name] = {
-                            file: {
-                                contents: file.content || ''
-                            }
-                        };
-                    } else {
-                        // For files, create a file entry with contents
-                        return {
-                            file: {
-                                contents: file.content || ''
-                            }
-                        };
-                    }
-                }
+            try {
+                const mountStructure = createMountStructure(files);
+                await webcontainer.mount(mountStructure);
+                console.log('Files mounted successfully');
+            } catch (err) {
+                console.error('Error mounting files:', err);
+            }
+        }
 
-                return mountStructure[file.name];
-            };
-
-            files.forEach(file => processFile(file, true));
-
-            return mountStructure;
-        };
-
-        const mountStructure = createMountStructure(files);
-
-        webcontainer?.mount(mountStructure);
+        mountFilesToWebContainer();
     }, [files, webcontainer]);
 
+    /**
+     * Creates the mount structure for WebContainer
+     * @param {Array} files - Array of file objects
+     * @returns {Object} Mount structure object
+     */
+    const createMountStructure = (files) => {
+        const mountStructure = {};
+
+        const processFile = (file, isRootFolder) => {
+            if (file.type === 'folder') {
+                const folderStructure = {
+                    directory: {}
+                };
+
+                if (file.children) {
+                    file.children.forEach(child => {
+                        const childResult = processFile(child, false);
+                        if (childResult) {
+                            folderStructure.directory[child.name] = childResult;
+                        }
+                    });
+                }
+
+                if (isRootFolder) {
+                    mountStructure[file.name] = folderStructure;
+                } else {
+                    return folderStructure;
+                }
+            } else if (file.type === 'file') {
+                const fileStructure = {
+                    file: {
+                        contents: file.content || ''
+                    }
+                };
+
+                if (isRootFolder) {
+                    mountStructure[file.name] = fileStructure;
+                } else {
+                    return fileStructure;
+                }
+            }
+        };
+
+        files.forEach(file => processFile(file, true));
+        return mountStructure;
+    };
+
+    /**
+     * Initialize the builder with template and steps
+     */
     async function init() {
-        const response = await axios.post(`${BACKEND_URL}/ai/template`, {
-            prompt: prompt.trim()
-        });
-        setTemplateSet(true);
+        try {
+            const response = await axios.post(`${BACKEND_URL}/ai/template`, {
+                prompt: prompt.trim()
+            });
+            setTemplateSet(true);
 
-        const { uiPrompts } = response.data;
-
-        setSteps(parseXml(uiPrompts[0]).map(x => ({
-            ...x,
-            status: "pending"
-        })));
-
-        setLoading(true);
-        const stepsResponse = await axios.post(`${BACKEND_URL}/ai/chat`, {
-            prompt: prompt
-        });
-
-
-        setLoading(false);
-
-        const responseContent = stepsResponse.data;
-        if (responseContent) {
-            setSteps(s => [...s, ...parseXml(responseContent).map(x => ({
+            const { uiPrompts } = response.data;
+            setSteps(parseXml(uiPrompts[0]).map(x => ({
                 ...x,
                 status: "pending"
-            }))]);
-        } else {
-            console.error("Response is undefined or null.");
+            })));
+
+            setLoading(true);
+            const stepsResponse = await axios.post(`${BACKEND_URL}/ai/chat`, {
+                prompt: prompt
+            });
+            
+            setLoading(false);
+
+            if (stepsResponse.data) {
+                setSteps(s => [...s, ...parseXml(stepsResponse.data).map(x => ({
+                    ...x,
+                    status: "pending"
+                }))]);
+            } else {
+                throw new Error("Response is undefined or null.");
+            }
+        } catch (err) {
+            console.error('Initialization error:', err);
+            setLoading(false);
         }
     }
 
@@ -163,48 +196,38 @@ const Builder = () => {
         init();
     }, []);
 
-    if (loading || !templateSet) {
+    if (error) {
         return (
-            <Loader />
-        )
+            <div className="error-container bg-red-100 p-4 rounded-lg">
+                <h2 className="text-red-700">WebContainer Error</h2>
+                <p>{error.message}</p>
+            </div>
+        );
     }
+
+    if (loading || !templateSet) {
+        return <Loader />;
+    }
+
     return (
-
-
         <section className='bg-gradient-to-br from-gray-900 to-gray-800 h-full w-full overflow-hidden'>
-            {/* Header */}
-            <header className='bg-gray-900 h-[var(--header-height)] border-b-2 border-b-gray-700 flex items-center '>
-                <h1 className='text-gray-100 text-2xl font-bold ml-2'>Webite Builder</h1>
+            <header className='bg-gray-900 h-[var(--header-height)] border-b-2 border-b-gray-700 flex items-center'>
+                <h1 className='text-gray-100 text-2xl font-bold ml-2'>Website Builder</h1>
             </header>
-            {/* Body */}
+            
             <div className='flex gap-20 p-3 h-full'>
-                {/* StepsList  Container */}
-                <div className='border-2 border-gray-700 h-[var(--depec-h)] w-[var(--depec-w)] min-w-[var(--depec-w)]  rounded-lg'>
+                <div className='border-2 border-gray-700 h-[var(--depec-h)] w-[var(--depec-w)] min-w-[var(--depec-w)] rounded-lg'>
                     <StepsList steps={steps} />
-                    {/* Chat Box */}
                     <Chatbox setLoading={setLoading} setSteps={setSteps} />
                 </div>
-                {/* Code Editor */}
+                
                 <div className='border-2 border-gray-700 h-[var(--codeEditor-h)] w-[var(--codeEditor-w)] min-w-[var(--codeEditor-w)] rounded-lg'>
-                    {/* Code / Preview Container */}
                     <TabView />
-                    {/* Code Editor */}
-                    {/* <div className="flex w-full h-[34.9rem] overflow-scroll scroll-hidden">
-                        <FileExplorer
-                            files={files}
-                            onFileSelect={setSelectedFile}
-                        />
-                        <CodeEditor file={selectedFile} />
-                    </div> */}
-                    {/* Preview */}
-
-                    {
-                        webcontainer ? <PreviewFrame webContainer={webcontainer} /> : ''
-                    }
+                    {webcontainer && <PreviewFrame webContainer={webcontainer} />}
                 </div>
             </div>
         </section>
-    )
-}
+    );
+};
 
-export default Builder
+export default Builder;

@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-const TabView = () => {
-    const [activeButton, setActiveButton] = useState('code');
+const TabView = ({activeButton, setActiveButton}) => {
 
     // Function to handle button click
     const handleButtonClick = (button) => {
